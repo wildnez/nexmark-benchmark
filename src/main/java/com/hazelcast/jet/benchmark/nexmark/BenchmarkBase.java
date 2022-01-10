@@ -1,8 +1,10 @@
 package com.hazelcast.jet.benchmark.nexmark;
 
+import com.hazelcast.config.Config;
+import com.hazelcast.config.NetworkConfig;
+import com.hazelcast.core.Hazelcast;
 import com.hazelcast.function.FunctionEx;
 import com.hazelcast.internal.util.HashUtil;
-import com.hazelcast.jet.Jet;
 import com.hazelcast.jet.accumulator.LongLongAccumulator;
 import com.hazelcast.jet.benchmark.nexmark.model.Auction;
 import com.hazelcast.jet.benchmark.nexmark.model.Bid;
@@ -30,7 +32,7 @@ import static java.lang.Integer.parseInt;
 import static java.util.concurrent.TimeUnit.SECONDS;
 
 public abstract class BenchmarkBase {
-    public static final String PROPS_FILENAME = "nexmark-jet.properties";
+    public static final String PROPS_FILENAME = "/app/resources/nexmark-jet.properties";
     public static final String PROP_EVENTS_PER_SECOND = "events-per-second";
     public static final String PROP_NUM_DISTINCT_KEYS = "num-distinct-keys";
     public static final String PROP_WINDOW_SIZE_MILLIS = "window-size-millis";
@@ -73,7 +75,23 @@ public abstract class BenchmarkBase {
         jobCfg.registerSerializer(Bid.class, Bid.BidSerializer.class);
         jobCfg.registerSerializer(Person.class, Person.PersonSerializer.class);
         jobCfg.registerSerializer(PickAnyAccumulator.class, PickAnyAccumulator.PickAnyAccumulatorSerializer.class);
-        var jet = Jet.bootstrappedInstance();
+
+        Config config = new Config();
+        config.getJetConfig().setEnabled(true);
+        NetworkConfig networkConfig = new NetworkConfig();
+
+        networkConfig.getInterfaces().setEnabled(false);
+        networkConfig.getJoin().getMulticastConfig().setEnabled(false);
+        networkConfig.getJoin().getTcpIpConfig().setEnabled(true);
+        networkConfig.getJoin().getTcpIpConfig().setEnabled(true).addMember("127.0.0.1");
+        config.setNetworkConfig(networkConfig);
+
+        var hazelcast = Hazelcast.newHazelcastInstance(config);
+
+
+        //var jet = Jet.newJetInstance(config);
+        var jet = hazelcast.getJet();
+
         try {
             int eventsPerSecond = parseIntProp(props, PROP_EVENTS_PER_SECOND);
             int numDistinctKeys = parseIntProp(props, PROP_NUM_DISTINCT_KEYS);
@@ -114,6 +132,7 @@ public abstract class BenchmarkBase {
             long totalTimeMillis = SECONDS.toMillis(warmupSeconds + measurementSeconds);
 
             var pipeline = Pipeline.create();
+
             var latencies = addComputation(pipeline, props);
             latencies.filter(t2 -> t2.f0() < totalTimeMillis)
                      .map(t2 -> String.format("%d,%d", t2.f0(), t2.f1()))
@@ -126,7 +145,8 @@ public abstract class BenchmarkBase {
 
             jobCfg.setProcessingGuarantee(guarantee);
             jobCfg.setSnapshotIntervalMillis(snapshotInterval);
-            var job = jet.newJob(pipeline, jobCfg);
+
+            var job = jet.newJobIfAbsent(pipeline, jobCfg);
             Runtime.getRuntime().addShutdownHook(new Thread(job::cancel));
             job.join();
         } catch (ValidationException e) {

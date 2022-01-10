@@ -25,9 +25,8 @@
             <url>https://repo1.maven.org/maven2/</url>
         </repository>
         <repository>
-            <id>release-repository</id>
-            <name>release repository</name>
-            <url>https://oss.sonatype.org/content/repositories/releases</url>
+            <id>Hazelcast Private Release Repository</id>
+            <url>https://repository.hazelcast.com/release/</url>
         </repository>
     </repositories>
 
@@ -74,10 +73,10 @@
                 <version>3.1.4</version>
                 <configuration>
                     <from>
-                        <image>registry.hub.docker.com/hazelcast/hazelcast-jet:${jet.version}</image>
+                        <image>openjdk:17.0.1</image>
                     </from>
                     <to>
-                        <image>hub.docker.com/wildnez/nexmark-billion-rahul</image>
+                        <image>hub.docker.com/wildnez/nexmark-10billion-jib</image>
                     </to>
                 </configuration>
             </plugin>
@@ -91,10 +90,9 @@
             <version>2.1.4</version>
         </dependency>
         <dependency>
-            <groupId>com.hazelcast.jet</groupId>
-            <artifactId>hazelcast-jet</artifactId>
-            <version>4.3</version>
-            <scope>provided</scope>
+            <groupId>com.hazelcast</groupId>
+            <artifactId>hazelcast</artifactId>
+            <version>5.0.2</version>
         </dependency>
         <dependency>
             <groupId>com.google.code.findbugs</groupId>

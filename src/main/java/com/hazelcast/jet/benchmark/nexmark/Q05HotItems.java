@@ -30,7 +30,8 @@ public class Q05HotItems extends BenchmarkBase {
         StreamStage<Bid> bids = pipeline
                 .readFrom(eventSource("bids", eventsPerSecond, INITIAL_SOURCE_DELAY_MILLIS, (seq, timestamp) ->
                         new Bid(seq, timestamp, seq % numDistinctKeys, 0)))
-                .withNativeTimestamps(0);
+                .withNativeTimestamps(0)
+                .rebalance();
 
         // NEXMark Query 5 start
         StreamStage<WindowResult<List<KeyedWindowResult<Long, Long>>>> queryResult = bids
