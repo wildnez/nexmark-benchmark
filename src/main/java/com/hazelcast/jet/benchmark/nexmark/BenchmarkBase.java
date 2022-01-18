@@ -78,11 +78,7 @@ public abstract class BenchmarkBase {
         jobCfg.registerSerializer(Person.class, Person.PersonSerializer.class);
         jobCfg.registerSerializer(PickAnyAccumulator.class, PickAnyAccumulator.PickAnyAccumulatorSerializer.class);
 
-        Config config = new Config();
-        config.getJetConfig().setEnabled(true);
-
-        var hazelcast = Hazelcast.newHazelcastInstance(config);
-
+        var hazelcast = Hazelcast.newHazelcastInstance();
         var jet = hazelcast.getJet();
 
         try {
