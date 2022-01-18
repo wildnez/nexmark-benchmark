@@ -32,7 +32,7 @@ spec:
     spec:
       containers:
       - name: nexmark9
-        image: wildnez/nexmark:18Jan
+        image: wildnez/nexmark:18Jan-2
         env:
           - name: HZ_NETWORK_JOIN_KUBERNETES_ENABLED
             value: "true"
