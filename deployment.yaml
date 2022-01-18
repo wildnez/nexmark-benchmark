@@ -1,0 +1,61 @@
+---
+apiVersion: v1
+kind: Service
+metadata:
+  name: nexmark9
+  labels:
+    app: nexmark9
+spec:
+  ports:
+  - port: 5701
+    name: hazelcast
+  clusterIP: None
+  selector:
+    app: nexmark9
+---
+apiVersion: apps/v1
+kind: StatefulSet
+metadata:
+  name: nexmark9
+  labels:
+    app: nexmark9
+spec:
+  serviceName: "nexmark9"
+  selector:
+    matchLabels:
+      app: nexmark9
+  replicas: 8
+  template:
+    metadata:
+      labels:
+        app: nexmark9
+    spec:
+      containers:
+      - name: nexmark9
+        image: wildnez/nexmark:18Jan
+        env:
+          - name: HZ_NETWORK_JOIN_KUBERNETES_ENABLED
+            value: "true"
+          - name: HZ_NETWORK_JOIN_KUBERNETES_SERVICENAME
+            value: "nexmark9"
+        resources:
+          requests:
+            memory: "4Gi"
+            cpu: "7"
+          limits:
+            memory: "5Gi"
+            cpu: "7"
+        ports:
+        - containerPort: 5701
+          name: hazelcast
+        volumeMounts:
+        - name: nexmark-histogram
+          mountPath: /data/benchmark-results
+  volumeClaimTemplates:
+  - metadata:
+      name: nexmark-histogram
+    spec:
+      accessModes: [ "ReadWriteOnce" ]
+      resources:
+        requests:
+          storage: 4Gi

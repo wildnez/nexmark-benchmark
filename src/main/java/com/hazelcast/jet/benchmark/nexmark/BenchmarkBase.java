@@ -56,13 +56,15 @@ public abstract class BenchmarkBase {
     }
 
     public static void main(String[] args) throws Exception {
-        if (args.length != 1) {
-            System.out.println("Supply one argument: the simple class name of a benchmark");
-            return;
-        }
-        String pkgName = BenchmarkBase.class.getPackage().getName();
-        BenchmarkBase benchmark = (BenchmarkBase)
-                Class.forName(pkgName + '.' + args[0]).newInstance();
+//        if (args.length != 1) {
+//            System.out.println("Supply one argument: the simple class name of a benchmark");
+//            return;
+//        }
+//        String pkgName = BenchmarkBase.class.getPackage().getName();
+//        BenchmarkBase benchmark = (BenchmarkBase)
+//                Class.forName(pkgName + '.' + args[0]).newInstance();
+
+        BenchmarkBase benchmark = new Q05HotItems();
         benchmark.run();
     }
 
@@ -78,18 +80,9 @@ public abstract class BenchmarkBase {
 
         Config config = new Config();
         config.getJetConfig().setEnabled(true);
-        NetworkConfig networkConfig = new NetworkConfig();
-
-        networkConfig.getInterfaces().setEnabled(false);
-        networkConfig.getJoin().getMulticastConfig().setEnabled(false);
-        networkConfig.getJoin().getTcpIpConfig().setEnabled(true);
-        networkConfig.getJoin().getTcpIpConfig().setEnabled(true).addMember("127.0.0.1");
-        config.setNetworkConfig(networkConfig);
 
         var hazelcast = Hazelcast.newHazelcastInstance(config);
 
-
-        //var jet = Jet.newJetInstance(config);
         var jet = hazelcast.getJet();
 
         try {
