@@ -1,0 +1,32 @@
+helm install nexmark-helm \
+    --set image.repository=wildnez/nexmark \
+    --set image.tag=25jan-3 \
+    --set cluster.memberCount=25 \
+    --set resources.requests.cpu=30 \
+    --set resources.limits.cpu=30 \
+    --set resources.requests.memory=12Gi \
+    --set resources.limits.memory=14Gi \
+    --set hazelcast.javaOpts="-Xms6G -Xmx7G -XX:MaxGCPauseMillis=10" \
+    --set rbac.create=true \
+    --set mancenter.licenseKey="UNLIMITED_LICENSE#99Nodes#8wdHWu6kSCT0YJniMNq9lDZAyKbPG15QXgjfEmB2UO48091999190010091111110003119019150000000010" \
+    --set mancenter.persistence.enabled=false \
+    --set jet.enabled=true --values values.yaml hazelcast/hazelcast
+
+
+
+
+
+
+    helm upgrade --install nexmark-helm \
+        --set image.repository=wildnez/nexmark \
+        --set image.tag=25jan-3 \
+        --set cluster.memberCount=25 \
+        --set resources.requests.cpu=30 \
+        --set resources.limits.cpu=30 \
+        --set resources.requests.memory=12Gi \
+        --set resources.limits.memory=14Gi \
+        --set hazelcast.javaOpts="-Xms6G -Xmx7G -XX:MaxGCPauseMillis=10" \
+        --set rbac.create=true \
+        --set mancenter.licenseKey="UNLIMITED_LICENSE#99Nodes#8wdHWu6kSCT0YJniMNq9lDZAyKbPG15QXgjfEmB2UO48091999190010091111110003119019150000000010" \
+        --set mancenter.persistence.enabled=false \
+        --set jet.enabled=true --values values.yaml hazelcast/hazelcast

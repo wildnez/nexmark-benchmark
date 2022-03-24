@@ -24,27 +24,34 @@ spec:
   selector:
     matchLabels:
       app: nexmark9
-  replicas: 8
+  replicas: 50
   template:
     metadata:
       labels:
         app: nexmark9
     spec:
+      serviceAccountName: default
       containers:
       - name: nexmark9
-        image: wildnez/nexmark:18Jan-2
+        image: wildnez/nexmark:28jan-2
         env:
+          - name: JAVA_TOOL_OPTIONS
+            value: "-Xms6G -Xmx7G -XX:MaxGCPauseMillis=10"
+          - name: HZ_JET_ENABLED
+            value: "true"
+          - name: HZ_JET_INSTANCE_COOPERATIVETHREADCOUNT
+            value: "13"
           - name: HZ_NETWORK_JOIN_KUBERNETES_ENABLED
             value: "true"
           - name: HZ_NETWORK_JOIN_KUBERNETES_SERVICENAME
             value: "nexmark9"
         resources:
           requests:
-            memory: "4Gi"
-            cpu: "7"
+            memory: "10Gi"
+            cpu: "15"
           limits:
-            memory: "5Gi"
-            cpu: "7"
+            memory: "12Gi"
+            cpu: "15"
         ports:
         - containerPort: 5701
           name: hazelcast
@@ -58,4 +65,4 @@ spec:
       accessModes: [ "ReadWriteOnce" ]
       resources:
         requests:
-          storage: 4Gi
+          storage: 10Gi

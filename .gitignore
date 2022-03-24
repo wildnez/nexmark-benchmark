@@ -1,4 +1,8 @@
 .gitignore
+terraform*
+.*terraform*
+.terraform/
+terraform/
 target/
 .clover/
 .idea/

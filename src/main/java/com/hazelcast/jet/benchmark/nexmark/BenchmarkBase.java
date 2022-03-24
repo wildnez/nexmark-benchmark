@@ -1,10 +1,10 @@
 package com.hazelcast.jet.benchmark.nexmark;
 
-import com.hazelcast.config.Config;
-import com.hazelcast.config.NetworkConfig;
 import com.hazelcast.core.Hazelcast;
 import com.hazelcast.function.FunctionEx;
 import com.hazelcast.internal.util.HashUtil;
+import com.hazelcast.jet.Jet;
+import com.hazelcast.jet.Job;
 import com.hazelcast.jet.accumulator.LongLongAccumulator;
 import com.hazelcast.jet.benchmark.nexmark.model.Auction;
 import com.hazelcast.jet.benchmark.nexmark.model.Bid;
@@ -32,7 +32,7 @@ import static java.lang.Integer.parseInt;
 import static java.util.concurrent.TimeUnit.SECONDS;
 
 public abstract class BenchmarkBase {
-    public static final String PROPS_FILENAME = "/app/resources/nexmark-jet.properties";
+    public static final String PROPS_FILENAME = "nexmark-jet.properties";
     public static final String PROP_EVENTS_PER_SECOND = "events-per-second";
     public static final String PROP_NUM_DISTINCT_KEYS = "num-distinct-keys";
     public static final String PROP_WINDOW_SIZE_MILLIS = "window-size-millis";
@@ -50,20 +50,14 @@ public abstract class BenchmarkBase {
     static final String BENCHMARK_DONE_MESSAGE = "benchmarking is done";
     static final long INITIAL_SOURCE_DELAY_MILLIS = 10;
 
+    static Job job;
+
     private int latencyReportingThresholdMs;
 
     BenchmarkBase() {
     }
 
     public static void main(String[] args) throws Exception {
-//        if (args.length != 1) {
-//            System.out.println("Supply one argument: the simple class name of a benchmark");
-//            return;
-//        }
-//        String pkgName = BenchmarkBase.class.getPackage().getName();
-//        BenchmarkBase benchmark = (BenchmarkBase)
-//                Class.forName(pkgName + '.' + args[0]).newInstance();
-
         BenchmarkBase benchmark = new Q05HotItems();
         benchmark.run();
     }
@@ -78,12 +72,11 @@ public abstract class BenchmarkBase {
         jobCfg.registerSerializer(Person.class, Person.PersonSerializer.class);
         jobCfg.registerSerializer(PickAnyAccumulator.class, PickAnyAccumulator.PickAnyAccumulatorSerializer.class);
 
-        Config config = new Config();
-        config.getJetConfig().setEnabled(true);
+        //4.5
+        //var jet = Jet.bootstrappedInstance();
 
-        var hazelcast = Hazelcast.newHazelcastInstance(config);
-
-        var jet = hazelcast.getJet();
+        //5.x
+        var jet = Hazelcast.bootstrappedInstance().getJet();
 
         try {
             int eventsPerSecond = parseIntProp(props, PROP_EVENTS_PER_SECOND);
@@ -125,7 +118,6 @@ public abstract class BenchmarkBase {
             long totalTimeMillis = SECONDS.toMillis(warmupSeconds + measurementSeconds);
 
             var pipeline = Pipeline.create();
-
             var latencies = addComputation(pipeline, props);
             latencies.filter(t2 -> t2.f0() < totalTimeMillis)
                      .map(t2 -> String.format("%d,%d", t2.f0(), t2.f1()))
@@ -138,8 +130,7 @@ public abstract class BenchmarkBase {
 
             jobCfg.setProcessingGuarantee(guarantee);
             jobCfg.setSnapshotIntervalMillis(snapshotInterval);
-
-            var job = jet.newJobIfAbsent(pipeline, jobCfg);
+            job = jet.newJob(pipeline, jobCfg);
             Runtime.getRuntime().addShutdownHook(new Thread(job::cancel));
             job.join();
         } catch (ValidationException e) {
@@ -154,7 +145,8 @@ public abstract class BenchmarkBase {
     static Properties loadProps() {
         Properties props = new Properties();
         try {
-            props.load(new FileInputStream(PROPS_FILENAME));
+            props.load(BenchmarkBase.class.getClassLoader().getResourceAsStream(PROPS_FILENAME));
+            //props.load(new FileInputStream(PROPS_FILENAME));
         } catch (FileNotFoundException e) {
             System.err.println("File not found: " + e.getMessage());
             System.exit(1);
@@ -241,6 +233,7 @@ public abstract class BenchmarkBase {
                 if (benchmarkDoneNow > benchmarkDoneLastReport) {
                     benchmarkDoneLastReport = benchmarkDoneNow;
                     System.out.format(BENCHMARK_DONE_MESSAGE + " -- %s%n", timeMsg);
+                    job.cancel();
                 }
                 return null;
             }

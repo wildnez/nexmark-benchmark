@@ -30,7 +30,7 @@
         </repository>
     </repositories>
 
-    <build>
+     <build>
         <plugins>
             <plugin>
                 <groupId>org.apache.maven.plugins</groupId>
@@ -51,21 +51,24 @@
                         <manifest>
                             <mainClass>com.hazelcast.jet.benchmark.nexmark.BenchmarkBase</mainClass>
                         </manifest>
+                        <manifestEntries>
+                            <Class-Path>.</Class-Path>
+                        </manifestEntries>
                     </archive>
                 </configuration>
             </plugin>
-            <plugin>
-                <groupId>org.apache.maven.plugins</groupId>
-                <artifactId>maven-shade-plugin</artifactId>
-                <executions>
-                    <execution>
-                        <phase>package</phase>
-                        <goals>
-                            <goal>shade</goal>
-                        </goals>
-                    </execution>
-                </executions>
-            </plugin>
+            <!--<plugin>-->
+                <!--<groupId>org.apache.maven.plugins</groupId>-->
+                <!--<artifactId>maven-shade-plugin</artifactId>-->
+                <!--<executions>-->
+                    <!--<execution>-->
+                        <!--<phase>package</phase>-->
+                        <!--<goals>-->
+                            <!--<goal>shade</goal>-->
+                        <!--</goals>-->
+                    <!--</execution>-->
+                <!--</executions>-->
+            <!--</plugin>-->
 
             <plugin>
                 <groupId>com.google.cloud.tools</groupId>
@@ -76,7 +79,7 @@
                         <image>openjdk:17.0.1</image>
                     </from>
                     <to>
-                        <image>wildnez/nexmark:18Jan-2</image>
+                        <image>wildnez/nexmark:28jan-2</image>
                     </to>
                 </configuration>
             </plugin>
@@ -89,11 +92,18 @@
             <artifactId>HdrHistogram</artifactId>
             <version>2.1.4</version>
         </dependency>
+
         <dependency>
             <groupId>com.hazelcast</groupId>
             <artifactId>hazelcast</artifactId>
             <version>5.0.2</version>
         </dependency>
+
+        <!--<dependency>-->
+            <!--<groupId>com.hazelcast.jet</groupId>-->
+            <!--<artifactId>hazelcast-jet</artifactId>-->
+            <!--<version>4.5.3</version>-->
+        <!--</dependency>-->
         <dependency>
             <groupId>com.google.code.findbugs</groupId>
             <artifactId>jsr305</artifactId>
